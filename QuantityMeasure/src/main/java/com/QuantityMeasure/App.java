@@ -2,104 +2,156 @@ package com.QuantityMeasure;
 
 public class App {
 
+    // UC1 and UC2
+    public static class Feet {
 
-// UC1: Feet Class
-public static class Feet {
+        private final double value;
 
-    private final double value;
+        public Feet(double value) {
+            this.value = value;
+        }
 
-    // Constructor
-    public Feet(double value) {
-        this.value = value;
+        @Override
+        public boolean equals(Object obj) {
+
+            if (this == obj)
+                return true;
+
+            if (obj == null)
+                return false;
+
+            if (getClass() != obj.getClass())
+                return false;
+
+            Feet other = (Feet) obj;
+
+            return Double.compare(this.value, other.value) == 0;
+        }
     }
 
-    // equals method override
-    @Override
-    public boolean equals(Object obj) {
 
-        // same reference
-        if (this == obj)
-            return true;
+    // UC2
+    public static class Inches {
 
-        // null check
-        if (obj == null)
-            return false;
+        private final double value;
 
-        // class check
-        if (getClass() != obj.getClass())
-            return false;
+        public Inches(double value) {
+            this.value = value;
+        }
 
-        // cast
-        Feet other = (Feet) obj;
+        @Override
+        public boolean equals(Object obj) {
 
-        // compare values
-        return Double.compare(this.value, other.value) == 0;
-    }
-}
+            if (this == obj)
+                return true;
 
+            if (obj == null)
+                return false;
 
-// UC2: Inches Class
-public static class Inches {
+            if (getClass() != obj.getClass())
+                return false;
 
-    private final double value;
+            Inches other = (Inches) obj;
 
-    // Constructor
-    public Inches(double value) {
-        this.value = value;
+            return Double.compare(this.value, other.value) == 0;
+        }
     }
 
-    // equals method override
-    @Override
-    public boolean equals(Object obj) {
 
-        // same reference
-        if (this == obj)
-            return true;
 
-        // null check
-        if (obj == null)
-            return false;
+   
+    // UC3 CODE START
+  
 
-        // class check
-        if (getClass() != obj.getClass())
-            return false;
+    public enum LengthUnit {
 
-        // cast
-        Inches other = (Inches) obj;
+        FEET(12.0),
+        INCHES(1.0);
 
-        // compare values
-        return Double.compare(this.value, other.value) == 0;
+        private final double conversionFactor;
+
+        LengthUnit(double conversionFactor) {
+            this.conversionFactor = conversionFactor;
+        }
+
+        public double getConversionFactor() {
+            return conversionFactor;
+        }
     }
-}
 
 
-// UC2 Method: Feet Equality Demo
-public static void demonstrateFeetEquality() {
 
-    Feet f1 = new Feet(1.0);
-    Feet f2 = new Feet(1.0);
+    public static class Length {
 
-    System.out.println("Feet Equal: " + f1.equals(f2));
-}
+        private final double value;
+
+        private final LengthUnit unit;
 
 
-// UC2 Method: Inches Equality Demo
-public static void demonstrateInchesEquality() {
+        public Length(double value, LengthUnit unit) {
 
-    Inches i1 = new Inches(1.0);
-    Inches i2 = new Inches(1.0);
+            if (unit == null)
+                throw new IllegalArgumentException("Unit cannot be null");
 
-    System.out.println("Inches Equal: " + i1.equals(i2));
-}
+            this.value = value;
+
+            this.unit = unit;
+        }
 
 
-// Main Method
-public static void main(String[] args) {
 
-    demonstrateFeetEquality();
+        private double convertToBaseUnit() {
 
-    demonstrateInchesEquality();
-}
+            return this.value * this.unit.getConversionFactor();
+        }
 
+
+
+        public boolean compare(Length other) {
+
+            return Double.compare(
+                    this.convertToBaseUnit(),
+                    other.convertToBaseUnit()) == 0;
+        }
+
+
+
+        @Override
+        public boolean equals(Object obj) {
+
+            if (this == obj)
+                return true;
+
+            if (obj == null)
+                return false;
+
+            if (getClass() != obj.getClass())
+                return false;
+
+            Length other = (Length) obj;
+
+            return this.compare(other);
+        }
+    }
+
+
+    // UC3 Demo
+
+    public static void demonstrateLengthEquality() {
+
+        Length l1 = new Length(1.0, LengthUnit.FEET);
+
+        Length l2 = new Length(12.0, LengthUnit.INCHES);
+
+        System.out.println(l1.equals(l2));
+
+    }
+
+
+    public static void main(String[] args) {
+
+        demonstrateLengthEquality();
+
+    }
 
 }
