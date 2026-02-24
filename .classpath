@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry excluding="QuantityMeasure/src/main/java/com/QuantityMeasure/" kind="src" path=""/>
+	<classpathentry kind="src" path="QuantityMeasure/src/main/java/com/QuantityMeasure"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

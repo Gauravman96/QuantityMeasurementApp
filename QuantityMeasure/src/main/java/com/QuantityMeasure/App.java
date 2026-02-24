@@ -60,7 +60,7 @@ public class App {
 
 
 
-    // UC3 + UC4
+    // UC3 + UC4 + UC5
 
     public enum LengthUnit {
 
@@ -77,7 +77,6 @@ public class App {
         private final double conversionFactor;
 
 
-
         LengthUnit(double conversionFactor) {
 
             this.conversionFactor = conversionFactor;
@@ -91,6 +90,7 @@ public class App {
             return conversionFactor;
 
         }
+
     }
 
 
@@ -105,6 +105,10 @@ public class App {
 
         public Length(double value, LengthUnit unit) {
 
+            if (!Double.isFinite(value))
+
+                throw new IllegalArgumentException("Invalid value");
+
             if (unit == null)
 
                 throw new IllegalArgumentException("Unit cannot be null");
@@ -117,7 +121,7 @@ public class App {
 
 
 
-        private double convertToBaseUnit() {
+        private double toBaseUnit() {
 
             return this.value * this.unit.getConversionFactor();
 
@@ -125,15 +129,11 @@ public class App {
 
 
 
-        public boolean compare(Length other) {
+        public Length convertTo(LengthUnit targetUnit) {
 
-            return Double.compare(
+            double result = convert(this.value, this.unit, targetUnit);
 
-                    this.convertToBaseUnit(),
-
-                    other.convertToBaseUnit()
-
-            ) == 0;
+            return new Length(result, targetUnit);
 
         }
 
@@ -144,22 +144,67 @@ public class App {
         public boolean equals(Object obj) {
 
             if (this == obj)
-
                 return true;
 
             if (obj == null)
-
                 return false;
 
             if (getClass() != obj.getClass())
-
                 return false;
 
             Length other = (Length) obj;
 
-            return this.compare(other);
+            return Double.compare(
+                    this.toBaseUnit(),
+                    other.toBaseUnit()
+            ) == 0;
 
         }
+
+
+
+        @Override
+        public String toString() {
+
+            return value + " " + unit;
+
+        }
+    }
+
+
+
+    // UC5 Conversion API
+
+    public static double convert( double value, LengthUnit source,LengthUnit target) {
+
+        if (!Double.isFinite(value))
+
+            throw new IllegalArgumentException("Invalid value");
+
+        if (source == null || target == null)
+
+            throw new IllegalArgumentException("Unit cannot be null");
+
+
+
+        double baseValue = value * source.getConversionFactor();
+
+        return baseValue / target.getConversionFactor();
+
+    }
+
+
+
+    // Demo methods
+
+
+    public static void demonstrateLengthConversion( double value, LengthUnit from,LengthUnit to ) {
+
+        double result = convert(value, from, to);
+
+        System.out.println(value + " " + from +
+
+                " = " + result + " " + to);
 
     }
 
@@ -168,21 +213,13 @@ public class App {
     public static void main(String[] args) {
 
 
-        Length yard = new Length(1.0, LengthUnit.YARDS);
-
-        Length feet = new Length(3.0, LengthUnit.FEET);
-
-        Length inch = new Length(36.0, LengthUnit.INCHES);
-
-        Length cm = new Length(1.0, LengthUnit.CENTIMETERS);
+        demonstrateLengthConversion(  1.0, LengthUnit.FEET, LengthUnit.INCHES );
 
 
+        demonstrateLengthConversion( 1.0, LengthUnit.YARDS, LengthUnit.FEET);
 
-        System.out.println(yard.equals(feet));
 
-        System.out.println(yard.equals(inch));
-
-        System.out.println(cm.equals(new Length(0.393701, LengthUnit.INCHES)));
+        demonstrateLengthConversion(  2.54,  LengthUnit.CENTIMETERS, LengthUnit.INCHES);
 
     }
 
