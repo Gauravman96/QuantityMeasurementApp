@@ -1,7 +1,6 @@
 package com.QuantityMeasure;
 
 
-import java.util.Objects;
 
 public class Weight {
 	// Instance variable to hold weight value and unit
@@ -38,7 +37,7 @@ public class Weight {
 
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(convertToBaseUnit());
+	    return Double.hashCode(unit.convertToBaseUnit(value));
 	}
 
 	public boolean compare(Weight thatWeight) {
@@ -61,7 +60,7 @@ public class Weight {
 
 		return new Weight(convertedValue, targetUnit);
 	}
-
+	
 	public Weight add(Weight thatWeight) {
 
 		if (thatWeight == null) {
@@ -80,8 +79,21 @@ public class Weight {
 
 		return new Weight(convertedValue, this.unit);
 	}
-
+	
+	/**
+	 * Adding weight to this weight with specific target unit
+	 */
+	public Weight add(Weight weight, WeightUnit targetUnit) {
+		return addAndConvert(weight, targetUnit);
+	}
+	
+	/**
+	 * Add two weights into one specific target unit
+	 */
 	private Weight addAndConvert(Weight weight, WeightUnit targetUnit) {
+		if (targetUnit == null) {
+			throw new IllegalArgumentException("Target unit cannot be null.");
+		}
 		Weight wt = this.add(weight);
 		double weightInGrams = wt.convertToBaseUnit();
 		double weightInTargetUnit = convertFromBaseUnitToTargetUnit(weightInGrams, targetUnit);
@@ -89,15 +101,12 @@ public class Weight {
 	}
 
 	private double convertToBaseUnit() {
-		double base = value * unit.getConversionFactor();
-		return Math.round(base * 100.0) / 100.0;
+	    return unit.convertToBaseUnit(value);
 	}
 
 	// Convert base unit to target unit
-	private double convertFromBaseUnitToTargetUnit(double weightInGrams, WeightUnit targetUnit) {
-		Weight grams = new Weight(weightInGrams, WeightUnit.GRAM);
-		Weight result = grams.convertTo(targetUnit);
-		return result.value;
+	private double convertFromBaseUnitToTargetUnit(double baseValue, WeightUnit targetUnit) {
+	    return baseValue / targetUnit.getConversionFactor();
 	}
 
 	@Override
@@ -151,11 +160,11 @@ public class Weight {
 		 */
 		Weight weight11 = new Weight(1000.0, WeightUnit.GRAM);
 		Weight weight12 = new Weight(1.0, WeightUnit.KILOGRAM);
-		System.out.println("1000 gram + 1 kilogram = " + weight11.addAndConvert(weight12, WeightUnit.MILIGRAM));
+		System.out.println("1000 gram + 1 kilogram = " + weight11.add(weight12, WeightUnit.MILIGRAM));
 		
 		Weight weight13 = new Weight(10.0, WeightUnit.POUND);
 		Weight weight14 = new Weight(10.0, WeightUnit.TONNE);
-		System.out.println("10 pound + 10 tonne = " + weight13.addAndConvert(weight14, WeightUnit.KILOGRAM));
+		System.out.println("10 pound + 10 tonne = " + weight13.add(weight14, WeightUnit.KILOGRAM));
 		
 		// Exception Test
 		try {
@@ -186,14 +195,14 @@ public class Weight {
 		
 		try {
 			Weight tonne = new Weight(10.0, WeightUnit.TONNE);
-			tonne.addAndConvert(weight14, null);
+			tonne.add(weight14, null);
 		} catch (IllegalArgumentException e) {
 			System.out.println("Error: " +e.getMessage());
 		}
 		
 		try {
 			Weight tonne = new Weight(10.0, WeightUnit.TONNE);
-			tonne.addAndConvert(null, WeightUnit.POUND);
+			tonne.add(null, WeightUnit.POUND);
 		} catch (IllegalArgumentException e) {
 			System.out.println("Error: " +e.getMessage());
 		}

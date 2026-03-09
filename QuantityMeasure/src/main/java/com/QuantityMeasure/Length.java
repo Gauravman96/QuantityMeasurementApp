@@ -1,20 +1,5 @@
-/**
- * Use Case 8: Refactor QuantityLength to Use Standalone LengthUnit Enum
- *
- * <p>Refactor the {@code QuantityLength} class to delegate unit conversion 
- * responsibilities to a standalone {@code LengthUnit} enum. This improves 
- * separation of concerns and encapsulation by isolating unit-specific logic.
- *
- * Following changes are made:
- * - Remove all internal conversion logic from QuantityLength.
- * - Update all conversion operations to delegate to unit methods.
- * - Simplify the class to focus on equality and arithmetic.
- *
-*/
 
 package com.QuantityMeasure;
-
-import java.util.Objects;
 
 public class Length {
 
@@ -52,7 +37,7 @@ public class Length {
 
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(convertToBaseUnit());
+	    return Double.hashCode(unit.convertToBaseUnit(value));
 	}
 
 	/**
@@ -94,6 +79,13 @@ public class Length {
 
 		return new Length(convertedValue, this.unit);
 	}
+	
+	/**
+	 * Adding length to this length with specific target unit
+	 */
+	public Length add(Length length, LengthUnit targetUnit) {
+		return addAndConvert(length, targetUnit);
+	}
 
 	/**
 	 * Add two lengths and convert them into specific target unit
@@ -118,15 +110,12 @@ public class Length {
 	 * Converts this length to base unit (inches)
 	 */
 	private double convertToBaseUnit() {
-		double base = value * unit.getConversionFactor();
-		return Math.round(base * 100.0) / 100.0;
+	    return unit.convertToBaseUnit(value);
 	}
 
 	// Convert base unit to target unit
-	private double convertFromBaseUnitToTargetUnit(double lengthInInches, LengthUnit targetUnit) {
-		Length inches = new Length(lengthInInches, LengthUnit.INCHES);
-		Length result = inches.convertTo(targetUnit);
-		return result.value;
+	private double convertFromBaseUnitToTargetUnit(double baseValue, LengthUnit targetUnit) {
+	    return baseValue / targetUnit.getConversionFactor();
 	}
 
 	@Override
@@ -176,12 +165,12 @@ public class Length {
 		// 1.0 Foot + 24.0 Inches = 1 Yard
 		Length fe = new Length(1.0, LengthUnit.FEET);
 		Length in = new Length(24.0, LengthUnit.INCHES);
-		System.out.println("1.0 Foot + 24.0 Inches = " + fe.addAndConvert(in, LengthUnit.YARDS));
+		System.out.println("1.0 Foot + 24.0 Inches = " + fe.add(in, LengthUnit.YARDS));
 
 		// 36.0 Inches + 1.0 Yard = 6 Feet
 		Length inchs = new Length(36.0, LengthUnit.INCHES);
 		Length yard = new Length(1.0, LengthUnit.YARDS);
-		System.out.println("36.0 Inches + 1.0 Yard = " + inchs.addAndConvert(yard, LengthUnit.FEET));
+		System.out.println("36.0 Inches + 1.0 Yard = " + inchs.add(yard, LengthUnit.FEET));
 
 		// Exception Test
 		try {
