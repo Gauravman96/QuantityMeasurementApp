@@ -1,5 +1,17 @@
-// Use Case 8: Refactor QuantityLength to Use Standalone LengthUnit Enum
- 
+/**
+ * Use Case 8: Refactor QuantityLength to Use Standalone LengthUnit Enum
+ *
+ * <p>Refactor the {@code QuantityLength} class to delegate unit conversion 
+ * responsibilities to a standalone {@code LengthUnit} enum. This improves 
+ * separation of concerns and encapsulation by isolating unit-specific logic.
+ *
+ * Following changes are made:
+ * - Remove all internal conversion logic from QuantityLength.
+ * - Update all conversion operations to delegate to unit methods.
+ * - Simplify the class to focus on equality and arithmetic.
+ *
+*/
+
 package com.QuantityMeasure;
 
 import java.util.Objects;
