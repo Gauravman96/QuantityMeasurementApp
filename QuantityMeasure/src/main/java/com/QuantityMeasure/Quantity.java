@@ -1,9 +1,18 @@
 /**
  * Represents a quantity with a numeric value and a unit of measurement.
+ *
+ * In UC12, the Quantity class has been enhanced to include additional operations
+ * such as subtraction and division.
+ * 1. Subtraction and division, along with improved error handling for incompatible 
+ * units and division by zero scenarios.
+ * 2. The equals method has been overridden to allow for meaningful comparisons between 
+ * Quantity objects based on their converted values in base units.
+ * 3. The toString method has also been overridden to provide a clear string representation
+ * of the Quantity object.
  * 
- * This class encapsulate a numeric value along with an associated measurable unit,
+ * This class encapsulates a numeric value along with an associated measurable unit,
  * allowing for flexible representation of measurements across different unit types.
- * 
+ *
  */
 
 package com.QuantityMeasure;
@@ -11,6 +20,8 @@ package com.QuantityMeasure;
 public class Quantity<U extends IMeasurable> {
 	private double value;
 	private U unit;
+	
+	private static final double EPSILON = 1e-9;
 	
 	public Quantity(double value, U unit) {
 		if (unit == null) {
@@ -66,6 +77,8 @@ public class Quantity<U extends IMeasurable> {
 		if (other == null) {
 			throw new IllegalArgumentException("Other cannot be null");
 		}
+		
+		validateSameCategory(other);
 
 		if (this.unit == other.unit) {
 			return new Quantity<>(this.value + other.value, this.unit);
@@ -90,12 +103,92 @@ public class Quantity<U extends IMeasurable> {
 	 */
 	
 	public Quantity<U> add(Quantity<U> other, U targetUnit) {
+		validateSameCategory(other);
 		Quantity<U> totalValue = this.add(other);
 		double totalInTargetUnit = totalValue.convertTo(targetUnit);
 		return new Quantity<U>(totalInTargetUnit, targetUnit);
 	}
 	
+	/**
+	 * Subtracts this Quantity from another Quantity of the same unit type and
+	 * returns the result in the unit of this Quantity.
+	 * 
+	 */
+	public Quantity<U> subtract(Quantity<U> other) {
+		if (other == null) {
+			throw new IllegalArgumentException("Other cannot be null");
+		}
+		
+		validateSameCategory(other);
+		
+		if (this.unit == other.unit) {
+			return new Quantity<>(this.value - other.value, this.unit);
+		}
+		
+		double otherBase = other.convertToBaseUnit(other.value);
+		double thisBase = this.convertToBaseUnit(this.value);
+		
+		double minusOfBase = thisBase - otherBase;
+		
+		double finalSubtraction = minusOfBase / this.unit.getConversionFactor();
+		
+		return new Quantity<>(finalSubtraction, this.unit);
+	}
 	
+	/**
+	 * Subtracts this Quantity from another Quantity of the same unit type and
+	 * returns the result in a specified target unit.
+	 * 
+	 */
+	public Quantity<U> subtract(Quantity<U> other, U targetUnit) {
+		if (other == null) {
+			throw new IllegalArgumentException("Other cannot be null");
+		}
+		
+		validateSameCategory(other);
+		
+		if (this.unit == other.unit) {
+			return new Quantity<>(this.value - other.value, this.unit);
+		}
+		
+		Quantity<U> remainingValue = this.subtract(other);
+		double remainedInTargetUnit = remainingValue.convertTo(targetUnit);
+		return new Quantity<U>(remainedInTargetUnit, targetUnit);
+	}
+	
+	/**
+	 * Divides this Quantity by another Quantity of the same unit type and
+	 * returns the result as a double.
+	 * 
+	 */
+	public double divide(Quantity<U> other) {
+		if (other == null) {
+			throw new IllegalArgumentException("Other cannot be null");
+		}
+		
+		validateSameCategory(other);
+		
+		double divisor = other.convertToBaseUnit(other.value);
+
+		if (Math.abs(divisor) < EPSILON)
+            throw new ArithmeticException("Division by zero");
+
+        return this.convertToBaseUnit(this.value) / divisor;
+	}
+	
+	/**
+	* Compares this Quantity with another object for equality. Two Quantity 
+	* objects are considered equal if they represent the same measurement value
+	* when converted to their respective base units.
+	*
+	* Logic to compare two Quantity objects:
+	* 1. Check if the other object is an instance of Quantity.
+	* 2. If not, return false.
+	* 3. If yes, convert both Quantity values to their base units using the 
+	* 	convertToBaseUnit method of their respective units.
+	* 4. Compare the converted values for equality.
+	* 5. Return true if they are equal, false otherwise.
+	*/
 	
 	@Override
 	public boolean equals(Object obj) {
@@ -127,6 +220,11 @@ public class Quantity<U extends IMeasurable> {
 	    double thatBase = that.convertToBaseUnit(that.value);
 
 	    return Double.compare(thisBase, thatBase) == 0;
+	}
+	
+	private void validateSameCategory(Quantity<U> other) {
+		if (!this.unit.getClass().equals(other.unit.getClass()))
+            throw new IllegalArgumentException("Cross-category operation not allowed");	
 	}
 
 	@Override
@@ -221,6 +319,85 @@ public class Quantity<U extends IMeasurable> {
 			Quantity<VolumeUnit> volume = new Quantity<>(1.0, null);
 	    	Quantity<VolumeUnit> litre = new Quantity<>(1.0, VolumeUnit.LITRE);
 	    	System.out.println(volume.equals(litre));
+		} catch (IllegalArgumentException e) {
+			System.out.println(e.getMessage());
+		}
+		
+		// Subtraction with Implicit Target Unit
+		Quantity<LengthUnit> feetSubtraction = new Quantity<>(10.0, LengthUnit.FEET).subtract(new Quantity<>(6.0, LengthUnit.INCHES));
+		System.out.println("10.0 feet - 6.0 inches = " + feetSubtraction);
+		
+		Quantity<WeightUnit> kgSubtraction = new Quantity<>(10.0, WeightUnit.KILOGRAM).subtract(new Quantity<>(5000.0, WeightUnit.GRAM));
+		System.out.println("10.0 kg - 5000.0 grams = " + kgSubtraction);
+		
+		Quantity<VolumeUnit> litreSubtraction = new Quantity<>(5.0, VolumeUnit.LITRE).subtract(new Quantity<>(500.0, VolumeUnit.MILLILITRE));
+		System.out.println("5.0 litre - 500.0 millilitre = " + litreSubtraction);
+		
+		// Subtraction with Explicit Target Unit
+		Quantity<LengthUnit> feetMinus = new Quantity<>(10.0, LengthUnit.FEET).subtract(new Quantity<>(6.0, LengthUnit.INCHES), LengthUnit.INCHES);
+		System.out.println("10.0 feet - 6.0 inches = " + feetMinus);
+		
+		Quantity<WeightUnit> kgMinus = new Quantity<>(10.0, WeightUnit.KILOGRAM).subtract(new Quantity<>(5000.0, WeightUnit.GRAM), WeightUnit.GRAM);
+		System.out.println("10.0 kg - 5000.0 grams = " + kgMinus);
+		
+		Quantity<VolumeUnit> litreMinus = new Quantity<>(5.0, VolumeUnit.LITRE).subtract(new Quantity<>(2.0, VolumeUnit.LITRE), VolumeUnit.MILLILITRE);
+		System.out.println("5.0 litre - 2.0 litre = " + litreMinus);
+		
+		// Subtraction Resulting in Negative Values
+		Quantity<LengthUnit> negFeet = new Quantity<>(5.0, LengthUnit.FEET).subtract(new Quantity<>(10.0, LengthUnit.FEET));
+		System.out.println("5.0 feet - 10.0 feet = " + negFeet);
+		
+		Quantity<WeightUnit> negKG = new Quantity<>(2.0, WeightUnit.KILOGRAM).subtract(new Quantity<>(5.0, WeightUnit.KILOGRAM));
+		System.out.println("2.0 kg - 5.0 kg = " + negKG);
+		
+		// Subtraction Resulting in Zero
+		Quantity<LengthUnit> zeroLength = new Quantity<>(10.0, LengthUnit.FEET).subtract(new Quantity<>(120.0, LengthUnit.INCHES));
+		System.out.println("10.0 feet - 120.0 inches = " + zeroLength);
+		
+		Quantity<VolumeUnit> zeroVolume = new Quantity<>(1.0, VolumeUnit.LITRE).subtract(new Quantity<>(1000.0, VolumeUnit.MILLILITRE));
+		System.out.println("1.0 litre - 1000.0 millilitre = " + zeroVolume);
+		
+		// Division Operations
+		double feetDivision = new Quantity<>(10.0, LengthUnit.FEET).divide(new Quantity<>(2.0, LengthUnit.FEET));
+		System.out.println("10.0 feet / 2.0 feet = " + feetDivision + " feet");
+		
+		double inchDivision = new Quantity<>(24.0, LengthUnit.INCHES).divide(new Quantity<>(2.0, LengthUnit.FEET));
+		System.out.println("24.0 inches / 2.0 feet = " + inchDivision + " inch");
+		
+		double kgDivision = new Quantity<>(10.0, WeightUnit.KILOGRAM).divide(new Quantity<>(5.0, WeightUnit.KILOGRAM));
+		System.out.println("10.0 kg / 5.0 kg = " + kgDivision + " kilogram");
+		
+		double litreDivision = new Quantity<>(5.0, VolumeUnit.LITRE).divide(new Quantity<>(10.0, VolumeUnit.LITRE));
+		System.out.println("5.0 litre / 10.0 litre = " + litreDivision + " litre");
+		
+		// Division with Different Units (Same Category):
+		double inchFeetDivision = new Quantity<>(12.0, LengthUnit.INCHES)
+		        .divide(new Quantity<>(1.0, LengthUnit.FEET));
+		System.out.println("12.0 inches / 1.0 feet = " + inchFeetDivision + " inch");
+
+		double gramKgDivision = new Quantity<>(2000.0, WeightUnit.GRAM)
+		        .divide(new Quantity<>(1.0, WeightUnit.KILOGRAM));
+		System.out.println("2000.0 gram / 1.0 kilogram = " + gramKgDivision + " grams");
+
+		double milliLitreLitreDivision = new Quantity<>(1000.0, VolumeUnit.MILLILITRE)
+		        .divide(new Quantity<>(1.0, VolumeUnit.LITRE));
+		System.out.println("1000.0 millilitre / 1.0 litre = " + milliLitreLitreDivision + " mililitre");
+		
+		// Error case
+		try {
+			new Quantity<>(10.0, LengthUnit.FEET).subtract(null);
+		} catch (IllegalArgumentException e) {
+			System.out.println(e.getMessage());
+		}
+		
+		try {
+			new Quantity<>(10.0, LengthUnit.FEET).divide(new Quantity<>(0.0, LengthUnit.FEET));
+		} catch (ArithmeticException e) {
+			System.out.println(e.getMessage());
+		}
+		
+		try {
+//			new Quantity<>(10.0, LengthUnit.FEET).subtract(new Quantity<>(5.0, LengthUnit.KILOGRAM));
 		} catch (IllegalArgumentException e) {
 			System.out.println(e.getMessage());
 		}

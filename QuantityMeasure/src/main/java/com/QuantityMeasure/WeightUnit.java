@@ -1,5 +1,21 @@
-package com.QuantityMeasure;
+/**
+ * WeightUnit.java
+ * 
+ * The WeightUnit enumeration implements IMeasurable interface and provides 
+ * methods for unit conversion. It defines various units of weight measurement 
+ * along with their conversion factors relative to a base unit (grams). This 
+ * enumeration is used in the QuantityMeasurement application to facilitate 
+ * conversions and comparisons between different weight units.
+ * 
+ * <p>The base unit for conversion is grams. Each unit stores a conversion factor 
+ * relative to grams (the base unit). This design simplifies unit conversions by 
+ * always converting through a common base unit. </p>
+ * 
+ * <p>Example: 1 KILOGRAM 1000.0 grams, 1 POUND 453.592 grams,
+ * 1 OUNCE 28.3495 grams</p>
+*/
 
+package com.QuantityMeasure;
 
 public enum WeightUnit implements IMeasurable {
 	// Conversion factor to the base unit(grams)

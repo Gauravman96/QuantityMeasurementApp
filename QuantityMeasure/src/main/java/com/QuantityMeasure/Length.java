@@ -19,9 +19,12 @@ public class Length {
 		this.unit = unit;
 	}
 
-	
-	 // Equals method is overridden to firstly check if the two objects are the same
-	
+	/**
+	 * Equals method is overridden to firstly check if the two objects are the same
+	 * reference. If not, it checks if the other object is null or of a different
+	 * class. Finally, calls the compare method to determine equality based on
+	 * converted values.
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
