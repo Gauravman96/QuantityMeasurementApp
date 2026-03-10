@@ -1,34 +1,4 @@
 package com.QuantityMeasure;
-/**
-* QuantityMeasurementApp — UC10 — Generic Quantity Class with Unit Interface for
-* Multi-Category Support
-*
-* This class demonstrates the complete functionality of the Quantity Measurement system 
-* by showcasing all operations including Comparison, Conversion, and Addition of quantities.
-* 
-* <p>
-* <b>Use Cases Covered:</b>
-* <ul>
-* 	<li><b>Comparison:</b> Compare two quantities of the same type to determine equality or magnitude</li>
-* 	<li><b>Conversion:</b> Convert quantities from one unit to another within the same measurement type</li>
-* 	<li><b>Addition:</b> Add two quantities of compatible types and return the result in a specified unit</li>
-* </ul>
-* </p>
-*
-* <p>
-* <b>Architecture:</b>
-* This class acts as a demonstration/driver class that internally utilizes the {@link Quantity} class
-* to perform all mathematical and conversion operations on various measurement types such as:
-* <ul>
-* 	<li>Length (Feet, Inch, Yard, Centimeter, etc.)</li>
-* 	<li>Volume (Liter, Milliliter, Gallon, Pint, etc.)</li>
-* 	<li>Weight (Kilogram, Gram, Tonne, Pound, etc.)</li>
-* 	<li>Temperature (Celsius, Fahrenheit)</li>
-* </ul>
-* </p>
-*/
-
-
 
 public class QuantityMeasurementApp {
 	
@@ -44,26 +14,10 @@ public class QuantityMeasurementApp {
 		return quantity1.equals(quantity2);
 	}
 	
-	/**
-	 * Demonstrate Conversion of a quantity to a target unit.
-	 * 
-	 * @param quantity the quantity to convert
-	 * @param targetUnit the target unit for conversion
-	 * @return a new Quantity with the converted value and unit
-	 */
-	
 	public static <U extends IMeasurable> Quantity<U> demonstrateConversion(Quantity<U> quantity, U targetUnit) {
 		double convertedValue = quantity.convertTo(targetUnit);
 		return new Quantity<U>(convertedValue, targetUnit);
 	}
-	
-	/**
-	 * Demonstrate Addition of two quantities and return the result in the unit of the first quantity.
-	 * 
-	 * @param quantity1 the first quantity to add
-	 * @param @param quantity1 the first quantity to add
-	 * @return a new Quantity representing the sum
-	 */
 	
 	public static <U extends IMeasurable> Quantity<U> demonstrateAddition(Quantity<U> quantity1,
 			Quantity<U> quantity2) {
@@ -94,12 +48,14 @@ public class QuantityMeasurementApp {
 		Quantity<LengthUnit> lengthInFeet = new Quantity<>(2.0, LengthUnit.FEET);
 		boolean areEqual = demonstrateEquality(lengthInInches, lengthInFeet);
 		System.out.println("Are lengths equal? " + areEqual);
-		
-		System.out.println("Hashcode: " + lengthInInches.hashCode() + " " + lengthInFeet.hashCode());
 
 		Quantity<WeightUnit> weightInGrams = new Quantity<>(1000.0, WeightUnit.GRAM);
 		Quantity<WeightUnit> weightInKilograms = new Quantity<>(1.0, WeightUnit.KILOGRAM);
 		System.out.println("Are weights equal? " + demonstrateEquality(weightInGrams, weightInKilograms));
+		
+		Quantity<VolumeUnit> volume1 = new Quantity<>(1.0, VolumeUnit.LITRE);
+		Quantity<VolumeUnit> volume2 = new Quantity<>(1000.0, VolumeUnit.MILLILITRE);
+		System.out.println("Are volumes equal? " + demonstrateEquality(volume1, volume2));
 		
 		// Demonstration conversion between the two quantities
 		Quantity<LengthUnit> convertedLength = demonstrateConversion(lengthInInches, LengthUnit.FEET);
@@ -107,6 +63,9 @@ public class QuantityMeasurementApp {
 
 		Quantity<WeightUnit> convertedWeight = demonstrateConversion(weightInKilograms, WeightUnit.POUND);
 		System.out.println("Converted Weight: " + convertedWeight.getValue() + " " + convertedWeight.getUnit());
+		
+		Quantity<VolumeUnit> convertedVolume = demonstrateConversion(volume1, VolumeUnit.GALLON);
+		System.out.println("Converted Volume: " + convertedVolume.getValue() + " " + convertedVolume.getUnit());
 		
 		// Demonstration addition of two quantities and return the result in the unit
 		// of the first quantity
@@ -118,6 +77,10 @@ public class QuantityMeasurementApp {
 		Quantity<WeightUnit> sumWeight = demonstrateAddition(weightInKilograms, weightInPound);
 		System.out.println("Sum Weight: " + sumWeight.getValue() + " " + sumWeight.getUnit());
 		
+		Quantity<VolumeUnit> volume3 = new Quantity<>(0.264172, VolumeUnit.GALLON);
+		Quantity<VolumeUnit> sumVolume = demonstrateAddition(volume1, volume3);
+		System.out.println("Sum Volume: " + sumVolume.getValue() + " " + sumVolume.getUnit());
+		
 		// Demonstration addition of two quantities and return the result in a specified
 		// target unit
 		Quantity<LengthUnit> lengthInCm = new Quantity<>(39.3701, LengthUnit.CENTIMETERS);
@@ -126,6 +89,20 @@ public class QuantityMeasurementApp {
 
 		Quantity<WeightUnit> sumWeightInGrams = demonstrateAddition(weightInKilograms, weightInPound, WeightUnit.GRAM);
 		System.out.println("Sum Weight in Grams: " + sumWeightInGrams.getValue() + " " + sumWeightInGrams.getUnit());
-
+		
+		Quantity<VolumeUnit> sumVolumeInMillilitre = demonstrateAddition(volume1, volume3, VolumeUnit.MILLILITRE);
+		System.out.println("Sum Volume in Grams: " + sumVolumeInMillilitre.getValue() + " " + sumVolumeInMillilitre.getUnit());
+		
+		try {
+			Quantity<VolumeUnit> volume = new Quantity<>(1.0, null);
+	    	Quantity<VolumeUnit> litre = new Quantity<>(1.0, VolumeUnit.LITRE);
+	    	System.out.println(volume.equals(litre));
+		} catch (IllegalArgumentException e) {
+			System.out.println(e.getMessage());
+		}
+		
+		Quantity<VolumeUnit> gallon = new Quantity<>(1.0, VolumeUnit.GALLON);
+    	Quantity<VolumeUnit> litre = new Quantity<>(3.78541, VolumeUnit.LITRE);
+    	System.out.println(gallon.add(litre));
 	}
 }

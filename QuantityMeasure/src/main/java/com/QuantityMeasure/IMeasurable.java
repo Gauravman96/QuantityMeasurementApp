@@ -1,5 +1,4 @@
-package com.QuantityMeasure;
-/**
+package com.QuantityMeasure;/**
  * IMeasurable interface defines the contract for measurable units.
  * 
  * This inerface serves as a common abstraction for diifferent types of measurements
@@ -9,6 +8,7 @@ package com.QuantityMeasure;
  * @see WeightUnit
  * @see LengthUnit
  */
+
 
 
 public interface IMeasurable {

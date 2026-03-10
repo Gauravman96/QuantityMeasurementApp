@@ -19,12 +19,9 @@ public class Length {
 		this.unit = unit;
 	}
 
-	/**
-	 * Equals method is overridden to firstly check if the two objects are the same
-	 * reference. If not, it checks if the other object is null or of a different
-	 * class. Finally, calls the compare method to determine equality based on
-	 * converted values.
-	 */
+	
+	 // Equals method is overridden to firstly check if the two objects are the same
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -91,6 +88,9 @@ public class Length {
 	 * Add two lengths and convert them into specific target unit
 	 */
 	private Length addAndConvert(Length length, LengthUnit targetUnit) {
+		if (targetUnit == null) {
+			throw new IllegalArgumentException("Target unit cannot be null.");
+		}
 		Length len = this.add(length);
 		double lengthInInches = len.convertToBaseUnit();
 		double lengthInTargetUnit = convertFromBaseUnitToTargetUnit(lengthInInches, targetUnit);

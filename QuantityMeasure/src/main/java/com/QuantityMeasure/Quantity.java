@@ -1,4 +1,3 @@
-package com.QuantityMeasure;
 /**
  * Represents a quantity with a numeric value and a unit of measurement.
  * 
@@ -7,6 +6,7 @@ package com.QuantityMeasure;
  * 
  */
 
+package com.QuantityMeasure;
 
 public class Quantity<U extends IMeasurable> {
 	private double value;
@@ -95,19 +95,7 @@ public class Quantity<U extends IMeasurable> {
 		return new Quantity<U>(totalInTargetUnit, targetUnit);
 	}
 	
-	/**
-	* Compares this Quantity with another object for equality. Two Quantity 
-	* objects are considered equal if they represent the same measurement value
-	* when converted to their respective base units.
-	*
-	* Logic to compare two Quantity objects:
-	* 1. Check if the other object is an instance of Quantity.
-	* 2. If not, return false.
-	* 3. If yes, convert both Quantity values to their base units using the 
-	* 	convertToBaseUnit method of their respective units.
-	* 4. Compare the converted values for equality.
-	* 5. Return true if they are equal, false otherwise.
-	*/
+	
 	
 	@Override
 	public boolean equals(Object obj) {
@@ -148,6 +136,15 @@ public class Quantity<U extends IMeasurable> {
 
 	public static void main(String[] args) {
 		
+		// Equal Method example
+		Quantity<LengthUnit> lengthInCm = new Quantity<>(254.0, LengthUnit.CENTIMETERS);
+		Quantity<LengthUnit> lengthInInches = new Quantity<>(100.0, LengthUnit.INCHES);
+		System.out.println("254.0 centimeters = 100.0 inches -> " + lengthInCm.equals(lengthInInches));
+				
+		Quantity<WeightUnit> lengthInPound = new Quantity<>(1000.0, WeightUnit.POUND);
+		Quantity<WeightUnit> lengthInKilogram = new Quantity<>(453.592, WeightUnit.KILOGRAM);
+		System.out.println("1000.0 pound = 453.592 kilogram -> " + lengthInPound.equals(lengthInKilogram));
+		
 		// Conversion method 
 		Quantity<LengthUnit> lengthInFeet = new Quantity<>(10.0, LengthUnit.YARDS);
 		System.out.println("10 yards = " + lengthInFeet.convertTo(LengthUnit.INCHES) + " inches");
@@ -184,14 +181,48 @@ public class Quantity<U extends IMeasurable> {
 		
 		System.out.println(weightInGram.add(weightInMiligram, WeightUnit.KILOGRAM));
 		
-		// Equal Method example
-		Quantity<LengthUnit> lengthInCm = new Quantity<>(254.0, LengthUnit.CENTIMETERS);
-		Quantity<LengthUnit> lengthInInches = new Quantity<>(100.0, LengthUnit.INCHES);
-		System.out.println("254.0 centimeters = 100.0 inches -> " + lengthInCm.equals(lengthInInches));
+		// Checking VoulemUnit Methods
 		
-		Quantity<WeightUnit> lengthInPound = new Quantity<>(1000.0, WeightUnit.POUND);
-		Quantity<WeightUnit> lengthInKilogram = new Quantity<>(453.592, WeightUnit.KILOGRAM);
-		System.out.println("1000.0 pound = 453.592 kilogram -> " + lengthInPound.equals(lengthInKilogram));
+		Quantity<VolumeUnit> volume1 = new Quantity<>(1.0, VolumeUnit.LITRE);
+		Quantity<VolumeUnit> volume2 = new Quantity<>(1000.0, VolumeUnit.MILLILITRE);
+		Quantity<VolumeUnit> volume3 = new Quantity<>(0.264172, VolumeUnit.GALLON);
 		
+		// Equal Method
+		System.out.println("Is volume1 equal to volume2? " + volume1.equals(volume2));
+		System.out.println("Is volume1 equal to volume3? " + volume1.equals(volume3));
+		
+		// Unit Conversion
+		System.out.println("1 Litre = " + volume1.convertTo(VolumeUnit.MILLILITRE) + " Millilitre");
+		System.out.println("0.264172 Gallon = " + volume3.convertTo(VolumeUnit.LITRE) + " Litre");
+		System.out.println("1 Millilitre = " + volume2.convertTo(VolumeUnit.GALLON) + " Gallon");
+		
+		// Add Method
+		System.out.println("1.0 Litre + 1000.0 Millilitre = " + volume1.add(volume2));
+		
+		// Add Method with target unit-specification
+		System.out.println("1.0 Litre + 0.264172 Gallon = " + volume1.add(volume3, VolumeUnit.MILLILITRE));
+		
+		System.out.println("1000.0 Millilitre + 0.264172 Gallon = " + volume2.add(volume3, VolumeUnit.GALLON));
+		
+		// Exception case of addition method
+		try {
+			volume1.add(null);
+		} catch (IllegalArgumentException e) {
+			System.out.println(e.getMessage());
+		}
+		
+		try {
+			volume2.add(volume3, null);
+		} catch (IllegalArgumentException e) {
+			System.out.println(e.getMessage());
+		}
+		
+		try {
+			Quantity<VolumeUnit> volume = new Quantity<>(1.0, null);
+	    	Quantity<VolumeUnit> litre = new Quantity<>(1.0, VolumeUnit.LITRE);
+	    	System.out.println(volume.equals(litre));
+		} catch (IllegalArgumentException e) {
+			System.out.println(e.getMessage());
+		}
 	}
 }

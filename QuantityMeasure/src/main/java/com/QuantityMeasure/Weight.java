@@ -1,7 +1,5 @@
 package com.QuantityMeasure;
 
-
-
 public class Weight {
 	// Instance variable to hold weight value and unit
 	private double value;
@@ -25,7 +23,8 @@ public class Weight {
 	public WeightUnit getUnit() {
 		return unit;
 	}
-
+	
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
