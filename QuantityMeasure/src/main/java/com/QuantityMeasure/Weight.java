@@ -1,6 +1,5 @@
 package com.QuantityMeasure;
 
-
 public class Weight {
 	// Instance variable to hold weight value and unit
 	private double value;

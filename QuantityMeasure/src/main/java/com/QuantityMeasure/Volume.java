@@ -1,6 +1,5 @@
 package com.QuantityMeasure;
 
-
 public class Volume {
 	// Instance variable to hold volume value and unit
 	private double value;

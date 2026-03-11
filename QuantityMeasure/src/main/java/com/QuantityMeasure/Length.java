@@ -104,7 +104,7 @@ public class Length {
 	/**
 	 * Compare two lengths
 	 */
-	private boolean compare(Length thatLength) {
+	private Boolean compare(Length thatLength) {
 		if (thatLength == null)
 			return false;
 		return Double.compare(this.convertToBaseUnit(), thatLength.convertToBaseUnit()) == 0;

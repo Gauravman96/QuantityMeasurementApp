@@ -1,3 +1,19 @@
+/**
+* QuantityMeasurementApp UC12 extends UC11 to implement subtraction and division operations
+* for quantity measurement.
+* 
+* This class provides functionality to perform subtraction and division operations on
+* different units of measurement. It extends the capabilities of UC11 by adding support for
+* these additional arithmetic operations.
+* 
+* Key Features:
+* 1. Subtraction of quantities with automatic unit conversion
+* 2. Division of quantities with automatic unit conversion
+* 3. Demonstration methods showcasing subtraction operations
+* 4. Demonstration methods showcasing division operations.
+*
+*/
+
 package com.QuantityMeasure;
 
 public class QuantityMeasurementApp {
