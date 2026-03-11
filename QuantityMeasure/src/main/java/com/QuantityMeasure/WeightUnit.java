@@ -31,6 +31,11 @@ public enum WeightUnit implements IMeasurable {
 		return conversionFactor;
 	}
 	
+	@Override
+	public String getUnitName() {
+		return this.toString();
+	}
+	
 	/**
 	 * Convert the length value to base unit value
 	 */

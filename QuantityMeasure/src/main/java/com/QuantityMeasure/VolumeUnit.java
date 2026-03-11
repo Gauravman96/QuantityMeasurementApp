@@ -1,19 +1,5 @@
 package com.QuantityMeasure;
-/**
- * VolumeUnit.java
- * 
- * The VolumeUnit enumeration implements IMeasurable interface and provides 
- * methods for unit conversion. It defines various units of volume measurement 
- * along with their conversion factors relative to a base unit (litre). This 
- * enumeration is used in the QuantityMeasurement application to facilitate 
- * conversions and comparisons between different volume units.
- * 
- * <p>The base unit for conversion is litre. Each unit stores a conversion factor 
- * relative to litre (the base unit). This design simplifies unit conversions by 
- * always converting through a common base unit. </p>
- * 
- * <p>Example: 1 LITRE 1000.0 MILLILITRE, 1 GALLON 3.78541 LITRE</p>
-*/
+
 
 public enum VolumeUnit implements IMeasurable{
 	
@@ -28,6 +14,11 @@ public enum VolumeUnit implements IMeasurable{
 	
 	public double getConversionFactor() {
 		return conversionFactor;
+	}
+	
+	@Override
+	public String getUnitName() {
+		return this.toString();
 	}
 	
 	/**

@@ -1,6 +1,7 @@
 
 package com.QuantityMeasure;
 
+
 public class Length {
 
 	// Instance variables
@@ -123,7 +124,7 @@ public class Length {
 
 	@Override
 	public String toString() {
-		return String.format("%.2f %s", value, unit);
+		return String.format("%.2f %s", value, unit.getUnitName());
 	}
 
 	// Main method for standalone testing

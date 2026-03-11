@@ -1,6 +1,5 @@
 package com.QuantityMeasure;
 
-
 public class QuantityMeasurementApp {
 	
 	/**
@@ -234,5 +233,13 @@ public class QuantityMeasurementApp {
     	} catch (IllegalArgumentException e) {
     		System.out.println(e.getMessage());
     	}
+    			
+		Quantity<VolumeUnit> oneLitre =
+	            new Quantity<>(1.0, VolumeUnit.LITRE);
+
+	    Quantity<VolumeUnit> equivalentGallon =
+	            new Quantity<>(0.264172, VolumeUnit.GALLON);
+	    System.out.println(equivalentGallon.convertTo(VolumeUnit.LITRE)); // 1.0
+	    System.out.println(oneLitre.equals(equivalentGallon)); // false
 	}
 }

@@ -1,5 +1,6 @@
 package com.QuantityMeasure;
 
+
 public class Volume {
 	// Instance variable to hold volume value and unit
 	private double value;
@@ -122,7 +123,7 @@ public class Volume {
 
 	@Override
 	public String toString() {
-		return String.format("%.2f %s", value, unit);
+		return String.format("%.2f %s", value, unit.getUnitName());
 	}
 
 	public static void main(String[] args) {
