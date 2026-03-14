@@ -1,6 +1,5 @@
 package com.QuantityMeasure;
 
-
 public enum WeightUnit implements IMeasurable {
 
     GRAM(1.0),

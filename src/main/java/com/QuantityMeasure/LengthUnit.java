@@ -2,9 +2,9 @@ package com.QuantityMeasure;
 
 public enum LengthUnit implements IMeasurable {
 
-    INCHES(1.0),
+    INCH(1.0),
     FEET(12.0),
-    YARDS(36.0);
+    YARD(36.0);
 
     private final double factor;
 
@@ -16,12 +16,10 @@ public enum LengthUnit implements IMeasurable {
         return factor;
     }
 
-    @Override
     public double convertToBaseUnit(double value) {
         return value * factor;
     }
 
-    @Override
     public double convertFromBaseUnit(double baseValue) {
         return baseValue / factor;
     }
