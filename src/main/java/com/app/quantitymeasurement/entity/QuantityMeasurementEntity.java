@@ -35,6 +35,11 @@ public class QuantityMeasurementEntity {
     private String errorMessage;
 
     private LocalDateTime createdAt;
+    
+    private String username; // ← ADD THIS
+
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
 
 	public Double getThisValue() {
 		return thisValue;

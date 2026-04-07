@@ -13,6 +13,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.*;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -25,30 +31,45 @@ public class SecurityConfig {
     private JwtUtil jwtUtil;
 
     @Autowired
-    private UserService userService; // 🔥 NEW
+    private UserService userService;
 
-    // Password Encoder
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // Authentication Manager
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+    public AuthenticationManager authenticationManager(
+            AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
-    // Security Filter Chain
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of("http://localhost:4200"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
 
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**", "/oauth2/**").permitAll()
+                .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                // ✅ API requests — authenticated via JWT only
+                .requestMatchers("/api/v1/**").authenticated()
                 .anyRequest().authenticated()
             )
 
@@ -56,15 +77,39 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
 
-            //  Google OAuth2 Login
+            // ✅ THIS IS THE KEY FIX
+            // When /api/v1/** request has no/bad token → return 401 JSON
+            // Do NOT redirect to Google login page
+            .exceptionHandling(ex -> ex
+                .defaultAuthenticationEntryPointFor(
+                    (request, response, authException) -> {
+                        System.out.println("❌ Unauthorized API request: "
+                            + request.getRequestURI());
+                        response.setStatus(401);
+                        response.setContentType("application/json");
+                        response.getWriter().write(
+                            "{\"error\":\"Unauthorized\"," +
+                            "\"message\":\"Invalid or missing JWT token\"}"
+                        );
+                    },
+                    // ✅ Only apply this entry point to /api/** requests
+                    new AntPathRequestMatcher("/api/**")
+                )
+            )
+
+            // Google OAuth2 — only for browser-initiated login
             .oauth2Login(oauth -> oauth
+            		.authorizationEndpoint(a -> a
+                            .baseUri("/oauth2/authorization")
+                        )
                 .successHandler((request, response, authentication) -> {
 
                     Object principal = authentication.getPrincipal();
-
                     String username = null;
 
-                    if (principal instanceof org.springframework.security.oauth2.core.user.DefaultOAuth2User oauthUser) {
+                    if (principal instanceof
+                        org.springframework.security.oauth2.core.user
+                            .DefaultOAuth2User oauthUser) {
                         username = oauthUser.getAttribute("email");
                     }
 
@@ -72,21 +117,23 @@ public class SecurityConfig {
                         username = authentication.getName();
                     }
 
-                    //  SAVE USER IN DB
                     userService.saveUserIfNotExists(username);
 
-                    //  Generate JWT
                     String token = jwtUtil.generateToken(username);
 
-                    response.setContentType("application/json");
-                    response.getWriter()
-                            .write("{\"token\":\"" + token + "\"}");
+                    System.out.println("✅ Google login success for: " + username);
+                    System.out.println("✅ Token generated: " + token);
+
+                    // Send token back to Angular
+                    response.sendRedirect(
+                        "http://localhost:4200/dashboard?token=" + token
+                    );
                 })
             );
 
+        //  JWT filter must run before Spring Security auth checks
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 }
-

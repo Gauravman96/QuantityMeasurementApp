@@ -1,3 +1,4 @@
+
 package com.app.quantitymeasurement.controller;
 
 import com.app.quantitymeasurement.entity.User;
@@ -8,8 +9,12 @@ import org.springframework.security.authentication.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/auth")
+@CrossOrigin(origins = "http://localhost:4200") // ← ADD THIS
 public class AuthController {
 
     @Autowired
@@ -36,9 +41,9 @@ public class AuthController {
         return "User registered successfully";
     }
 
-    //  LOGIN
+    // LOGIN
     @PostMapping("/login")
-    public String login(@RequestBody User user) {
+    public Map<String, String> login(@RequestBody User user) {
 
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -47,6 +52,11 @@ public class AuthController {
                 )
         );
 
-        return jwtUtil.generateToken(user.getUsername());
+        String token = jwtUtil.generateToken(user.getUsername());
+
+        Map<String, String> response = new HashMap<>();
+        response.put("token", token);
+
+        return response;
     }
 }

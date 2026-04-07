@@ -14,8 +14,16 @@ public interface IQuantityMeasurementService {
     QuantityMeasurementEntity convert(QuantityInputDTO input);
 
     QuantityMeasurementEntity add(QuantityInputDTO input);
+    
+    QuantityMeasurementEntity subtract(QuantityInputDTO input);
+    QuantityMeasurementEntity multiply(QuantityInputDTO input);
+    QuantityMeasurementEntity divide(QuantityInputDTO input);
 
     List<QuantityMeasurementEntity> getHistoryByOperation(String operation);
+    
+    List<QuantityMeasurementEntity> getHistoryByUser(String username);
+    
+    List<QuantityMeasurementEntity> getHistoryByUserAndOperation(String username, String operation);
 
     long getOperationCount(String operation);
 

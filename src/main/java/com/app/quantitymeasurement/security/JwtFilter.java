@@ -11,7 +11,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-
 import java.io.IOException;
 
 @Component
@@ -34,46 +33,53 @@ public class JwtFilter extends OncePerRequestFilter {
         String username = null;
         String token = null;
 
-        //  Extract token safely
+        // ── Step 1: Extract token ──────────────────────────
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            token = authHeader.substring(7); // only check token
-
+            token = authHeader.substring(7);
             try {
                 username = jwtUtil.extractUsername(token);
+                System.out.println("✅ JWT username extracted: " + username);
             } catch (Exception e) {
-                System.out.println("Invalid JWT Token: " + e.getMessage());
+                System.out.println("❌ Invalid JWT Token: " + e.getMessage());
             }
+        } else {
+            System.out.println("⚠️ No Bearer token found in request: "
+                + request.getRequestURI());
         }
 
-        //  Validate token safely
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-
+        // ── Step 2: Validate and set authentication ────────
+        if (username != null &&
+            SecurityContextHolder.getContext().getAuthentication() == null) {
             try {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                UserDetails userDetails =
+                    userDetailsService.loadUserByUsername(username);
 
-                if (jwtUtil.validateToken(token, userDetails.getUsername())) {
+                // ✅ Pass username string — matches your JwtUtil signature
+                boolean isValid = jwtUtil.validateToken(token, username);
+                System.out.println("✅ Token valid: " + isValid);
 
+                if (isValid) {
                     UsernamePasswordAuthenticationToken authToken =
-                            new UsernamePasswordAuthenticationToken(
-                                    userDetails,
-                                    null,
-                                    userDetails.getAuthorities()
-                            );
-
+                        new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                        );
                     authToken.setDetails(
-                            new WebAuthenticationDetailsSource().buildDetails(request)
+                        new WebAuthenticationDetailsSource().buildDetails(request)
                     );
-
                     SecurityContextHolder.getContext().setAuthentication(authToken);
+                    System.out.println("✅ Authentication set for: " + username);
+                } else {
+                    System.out.println("❌ Token validation failed for: " + username);
                 }
 
             } catch (Exception e) {
-                //  Google login case: user DB me nahi mila
-                System.out.println("User not found in DB (Google login): " + username);
+                System.out.println("❌ Auth error for user: " + username
+                    + " → " + e.getMessage());
             }
         }
 
         filterChain.doFilter(request, response);
     }
 }
-
