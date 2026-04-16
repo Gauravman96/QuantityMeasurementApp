@@ -1,7 +1,20 @@
-FROM openjdk:17-jdk-slim
+FROM maven:3.9.8-eclipse-temurin-17 AS builder
 
 WORKDIR /app
 
-COPY target/*.jar app.jar
+COPY pom.xml ./
+COPY mvnw ./
+COPY .mvn .mvn
+RUN chmod +x mvnw
+RUN ./mvnw -q -DskipTests dependency:go-offline
 
-ENTRYPOINT ["java","-jar","app.jar"]
+COPY src src
+RUN ./mvnw -q -DskipTests package
+
+FROM eclipse-temurin:17-jre-jammy
+
+WORKDIR /app
+
+COPY --from=builder /app/target/*.jar app.jar
+
+CMD ["sh", "-c", "java -Dserver.port=${PORT:-8082} -jar app.jar"]
